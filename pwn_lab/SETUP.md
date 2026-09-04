@@ -1,8 +1,10 @@
 ## DOCKER CONTAINER SETUP
 
+- First check the `DOCKER_COMMANDS.md` to setup the user and groups and permissions before applying the below changes.
+- Create Docker Image and Run the Container
+
 ```bash
-git clone https://github.com/ghostware0x00/pwncollege # step 1 (clone the repo)
-cd pwncollege/pwnlab # step 2 (go inside the pwnlab directory)
-chmod +x entrypoint.sh # give executable permissions
+# give executable permissions
+chmod +x entrypoint.sh 
 chmod +x pwnlab.sh
 ```

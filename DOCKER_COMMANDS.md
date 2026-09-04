@@ -33,11 +33,16 @@ sudo usermod -a -G docker $USER
 
 ### 5. Check whether Group added to User
 
-- sometimes even after executing the above commands typing `groups` won't show the `docker` group for the current user. In that case type the below command and rerun the `groups` command.
+- sometimes even after executing the above commands typing `groups` won't show the `docker` group for the current user. 
+- In that case you have **2 ways** type the below command and rerun the `groups` command. 
 
 ```bash
 exec su - $USER #restarts the current shell session again
 ```
+
+**OR**
+
+- Just **RESTART THE PC** and type `groups` command. This forces the computer to apply the changes made during.
 
 ---
 
