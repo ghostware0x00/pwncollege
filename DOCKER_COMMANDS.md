@@ -66,3 +66,11 @@ docker builder prune -a
 ```bash
 docker ps -a
 ```
+
+
+### Wipe the Docker Cache & Unused Data
+
+```bash
+docker system prune -a --volumes --force
+```
+
