@@ -1,0 +1,195 @@
+# ================================================================
+# PwnLab Zsh configuration
+# ================================================================
+
+# ------------------------------------------------
+# Environment
+# ------------------------------------------------
+
+export LANG=C.UTF-8
+export LC_ALL=C.UTF-8
+
+export TERM="${TERM:-xterm-256color}"
+export COLORTERM=truecolor
+
+export EDITOR=vim
+export VISUAL=vim
+
+# ------------------------------------------------
+# Oh My Zsh
+# ------------------------------------------------
+
+export ZSH="$HOME/.oh-my-zsh"
+
+ZSH_THEME="powerlevel10k/powerlevel10k"
+
+# Don't let Oh My Zsh update itself automatically.
+zstyle ':omz:update' mode disabled
+
+# ------------------------------------------------
+# Plugins
+# ------------------------------------------------
+
+plugins=(
+    git
+    zsh-autosuggestions
+    zsh-syntax-highlighting
+)
+
+source "$ZSH/oh-my-zsh.sh"
+
+# ------------------------------------------------
+# History
+# ------------------------------------------------
+
+HISTFILE="$HOME/.zsh_history"
+
+HISTSIZE=50000
+SAVEHIST=50000
+
+setopt HIST_IGNORE_DUPS
+setopt HIST_IGNORE_ALL_DUPS
+setopt HIST_SAVE_NO_DUPS
+setopt HIST_REDUCE_BLANKS
+setopt SHARE_HISTORY
+setopt APPEND_HISTORY
+setopt INC_APPEND_HISTORY
+
+# ------------------------------------------------
+# Completion
+# ------------------------------------------------
+
+autoload -Uz compinit
+compinit
+
+# ------------------------------------------------
+# Python virtual environment
+# ------------------------------------------------
+
+export VIRTUAL_ENV_DISABLE_PROMPT=1
+
+# ------------------------------------------------
+# Pwn environment variables
+# ------------------------------------------------
+
+export PWN_HOME="$HOME"
+export PWN_WORKSPACE="/workspace"
+
+export PYTHONUNBUFFERED=1
+export PYTHONDONTWRITEBYTECODE=1
+
+# ------------------------------------------------
+# PATH
+# ------------------------------------------------
+
+export PATH="$HOME/.local/bin:$HOME/venv/bin:$PATH"
+
+# ------------------------------------------------
+# Useful aliases
+# ------------------------------------------------
+
+alias ll='ls -lah --color=auto'
+alias la='ls -A --color=auto'
+alias l='ls -CF --color=auto'
+
+alias cls='clear'
+
+alias py='python3'
+alias python='python3'
+
+alias gdbp='gdb -q'
+alias gdbr='gdb -q'
+
+alias c='clear'
+alias ..='cd ..'
+alias ...='cd ../..'
+
+# ------------------------------------------------
+# Pwn shortcuts
+# ------------------------------------------------
+
+alias sec='checksec'
+alias elf='readelf'
+alias dis='objdump -d'
+alias disasm='objdump -M intel -d'
+
+# ------------------------------------------------
+# Challenge helpers
+# ------------------------------------------------
+
+function pwninfo() {
+    echo
+    echo "╭──────────────────────────────────────────────╮"
+    echo "│                 PwnLab                      │"
+    echo "├──────────────────────────────────────────────┤"
+    echo "│ User       : $(whoami)"
+    echo "│ Host       : $(hostname)"
+    echo "│ OS         : $(. /etc/os-release && echo "$PRETTY_NAME")"
+    echo "│ Arch       : $(uname -m)"
+    echo "│ Python     : $(python3 --version 2>&1)"
+    echo "│ GCC        : $(gcc --version | head -n1)"
+    echo "│ GDB        : $(gdb --version | head -n1)"
+    echo "│ Workspace  : $PWN_WORKSPACE"
+    echo "╰──────────────────────────────────────────────╯"
+    echo
+}
+
+function elfinfo() {
+    if [[ -z "$1" ]]; then
+        echo "Usage: elfinfo <binary>"
+        return 1
+    fi
+
+    echo
+    echo "========== FILE =========="
+    file "$1"
+
+    echo
+    echo "========== CHECKSEC =========="
+    checksec --file="$1"
+
+    echo
+    echo "========== ELF HEADER =========="
+    readelf -h "$1"
+
+    echo
+    echo "========== INTERPRETER =========="
+    readelf -l "$1" | grep 'Requesting program interpreter' || true
+
+    echo
+}
+
+function gdbpwn() {
+    if [[ -z "$1" ]]; then
+        echo "Usage: gdbpwn <binary> [gdb arguments]"
+        return 1
+    fi
+
+    gdb -q "$@"
+}
+
+# ------------------------------------------------
+# Workspace
+# ------------------------------------------------
+
+function cdpwn() {
+    cd /workspace || return
+}
+
+# ------------------------------------------------
+# Pwnlab startup information
+# ------------------------------------------------
+
+if [[ -t 1 ]]; then
+    echo
+    echo "  [ PwnLab container ]"
+    echo "  Workspace: /workspace"
+    echo "  Type 'pwninfo' for environment information."
+    echo
+fi
+
+# ------------------------------------------------
+# Powerlevel10k
+# ------------------------------------------------
+
+[[ ! -f "$HOME/.p10k.zsh" ]] || source "$HOME/.p10k.zsh"
