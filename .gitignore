@@ -1,2 +1,9 @@
 Test/
 .obsidian
+.git
+.gitignore
+pwn
+*.log
+*.core
+__pycache__
+*.pyc

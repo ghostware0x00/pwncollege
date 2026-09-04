@@ -27,6 +27,7 @@ RUN apt-get update && apt-get install -y \
     wget \
     ca-certificates \
     sudo \
+    gosu \
     vim \
     nano \
     tmux \
@@ -83,30 +84,35 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # ------------------------------------------------
-# Create non-root pwn user
+# Create container user
+#
+# The UID/GID are deliberately NOT tied to the host
+# here. They are synchronized at container startup.
 # ------------------------------------------------
 
-RUN useradd \
-    --create-home \
-    --shell /bin/zsh \
-    pwn
+RUN groupadd --gid 1000 pwn && \
+    useradd \
+        --uid 1000 \
+        --gid 1000 \
+        --create-home \
+        --shell /bin/zsh \
+        pwn
+
+# ------------------------------------------------
+# Sudo
+# ------------------------------------------------
 
 RUN echo "pwn ALL=(ALL) NOPASSWD:ALL" \
-    > /etc/sudoers.d/pwn
-
-RUN chmod 0440 /etc/sudoers.d/pwn
-
-# ------------------------------------------------
-# Switch to pwn user
-# ------------------------------------------------
-
-USER pwn
-
-WORKDIR /workspace
+    > /etc/sudoers.d/pwn && \
+    chmod 0440 /etc/sudoers.d/pwn
 
 # ------------------------------------------------
 # Oh My Zsh
 # ------------------------------------------------
+
+USER pwn
+
+WORKDIR /home/pwn
 
 RUN git clone \
     --depth=1 \
@@ -173,19 +179,23 @@ COPY --chown=pwn:pwn p10k.zsh /home/pwn/.p10k.zsh
 COPY --chown=pwn:pwn zshrc /home/pwn/.zshrc
 
 # ------------------------------------------------
-# Shell defaults
+# Runtime entrypoint
+# ------------------------------------------------
+
+USER root
+
+COPY entrypoint.sh /usr/local/bin/pwnlab-entrypoint
+
+RUN chmod 755 /usr/local/bin/pwnlab-entrypoint
+
+# ------------------------------------------------
+# Container environment
 # ------------------------------------------------
 
 ENV SHELL=/bin/zsh
 
-# ------------------------------------------------
-# Working directory
-# ------------------------------------------------
-
 WORKDIR /workspace
 
-# ------------------------------------------------
-# Container startup
-# ------------------------------------------------
+ENTRYPOINT ["/usr/local/bin/pwnlab-entrypoint"]
 
 CMD ["zsh", "-l"]
