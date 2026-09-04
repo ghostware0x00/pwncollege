@@ -21,15 +21,26 @@ sudo systemctl enable docker.service
 
 ### 4. Add Current User to Docker Group
 
-- This lets the current user use the docker with the `sudo` command.
-
+- creating the `docker` group first before adding the `USER` to this group.
 ```bash
-sudo usermod -aG docker $(whoami)
+sudo groupadd docker
 ```
 
-- Type `groups` command and check whether `docker` is showing in the command output. If not showing then type `newgrp docker` and press enter and then type `groups` command again to recheck.
+- This lets the current user use the docker with the `sudo` command.
+```bash
+sudo usermod -a -G docker $USER
+```
+
+### 5. Check whether Group added to User
+
+- sometimes even after executing the above commands typing `groups` won't show the `docker` group for the current user. In that case type the below command and rerun the `groups` command.
+
+```bash
+exec su - $USER #restarts the current shell session again
+```
 
 ---
+
 ## Starting Container
 
 ### 1. `git clone` 
