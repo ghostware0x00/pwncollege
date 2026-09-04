@@ -23,7 +23,7 @@ ssh -i <pwncollege private_key> hacker@dojo.pwn.college
 ## Copy files from PwnCollege
 
 ```bash
-scp -i <pwncollege private_key> hacker@dojo.pwn.college:<challenge file_path>
+scp -i <pwncollege private_key> hacker@dojo.pwn.college:<challenge file_path> <directory path to copy into>
 ```
 
 ---
