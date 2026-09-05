@@ -11,41 +11,31 @@ echo "=============================================="
 echo "[+] Host UID: $HOST_UID"
 echo "[+] Host GID: $HOST_GID"
 
-# ------------------------------------------------
-# Remove Ubuntu's default user
-# ------------------------------------------------
-
+# Remove Ubuntu's default user if present
 if getent passwd ubuntu >/dev/null 2>&1; then
     echo "[+] Removing default ubuntu user..."
     userdel -r ubuntu 2>/dev/null || true
 fi
 
 if getent group ubuntu >/dev/null 2>&1; then
-    echo "[+] Removing default ubuntu group..."
     groupdel ubuntu 2>/dev/null || true
 fi
 
-# ------------------------------------------------
-# Make sure host UID is usable
-# ------------------------------------------------
-
+# Host UID must not be root
 if [ "$HOST_UID" = "0" ]; then
     echo "[!] Host UID 0 is not supported."
     exit 1
 fi
 
-# ------------------------------------------------
-# UID
-# ------------------------------------------------
-
+# Check UID conflict
 EXISTING_USER="$(getent passwd "$HOST_UID" | cut -d: -f1 || true)"
 
 if [ -n "$EXISTING_USER" ] && [ "$EXISTING_USER" != "pwn" ]; then
     echo "[!] UID $HOST_UID is already used by '$EXISTING_USER'."
-    echo "[!] Cannot safely remap pwn to this UID."
     exit 1
 fi
 
+# Change UID
 CURRENT_UID="$(id -u pwn)"
 
 if [ "$CURRENT_UID" != "$HOST_UID" ]; then
@@ -53,18 +43,15 @@ if [ "$CURRENT_UID" != "$HOST_UID" ]; then
     usermod -u "$HOST_UID" pwn
 fi
 
-# ------------------------------------------------
-# GID
-# ------------------------------------------------
-
+# Check GID
 EXISTING_GROUP="$(getent group "$HOST_GID" | cut -d: -f1 || true)"
 
 if [ -n "$EXISTING_GROUP" ] && [ "$EXISTING_GROUP" != "pwn" ]; then
     echo "[!] GID $HOST_GID is already used by '$EXISTING_GROUP'."
-    echo "[!] Cannot safely remap pwn to this GID."
     exit 1
 fi
 
+# Change GID
 CURRENT_GID="$(id -g pwn)"
 
 if [ "$CURRENT_GID" != "$HOST_GID" ]; then
@@ -72,22 +59,11 @@ if [ "$CURRENT_GID" != "$HOST_GID" ]; then
     groupmod -g "$HOST_GID" pwn
 fi
 
-# ------------------------------------------------
-# Fix pwn home ownership
-# ------------------------------------------------
+# Fix home ownership
+chown "$HOST_UID:$HOST_GID" /home/pwn
 
-chown -R "$HOST_UID:$HOST_GID" /home/pwn
-
-# ------------------------------------------------
-# Workspace
-# ------------------------------------------------
-
-echo "[+] Workspace permissions:"
+echo "[+] Workspace:"
 ls -ld /workspace
-
-# ------------------------------------------------
-# Start shell as pwn
-# ------------------------------------------------
 
 echo
 echo "=============================================="
@@ -95,4 +71,7 @@ echo " Starting PwnLab"
 echo "=============================================="
 echo
 
-exec su -s /bin/zsh pwn -c 'cd /workspace && exec zsh -l'
+# IMPORTANT:
+# gosu directly replaces the shell process.
+# This gives proper Ctrl+C / SIGINT handling.
+exec gosu pwn zsh -l

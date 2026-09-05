@@ -63,6 +63,7 @@ RUN apt-get update && apt-get install -y \
     radare2 \
     qemu-user \
     qemu-user-static \
+    gosu \
     && rm -rf /var/lib/apt/lists/*
 
 # ================================================================
@@ -87,35 +88,7 @@ USER pwn
 WORKDIR /home/pwn
 
 # ================================================================
-# Oh My Zsh
-# ================================================================
-
-RUN git clone --depth=1 \
-    https://github.com/ohmyzsh/ohmyzsh.git \
-    "$HOME/.oh-my-zsh"
-
-# ================================================================
-# Powerlevel10k
-# ================================================================
-
-RUN git clone --depth=1 \
-    https://github.com/romkatv/powerlevel10k.git \
-    "$HOME/.oh-my-zsh/custom/themes/powerlevel10k"
-
-# ================================================================
-# Zsh plugins
-# ================================================================
-
-RUN git clone --depth=1 \
-    https://github.com/zsh-users/zsh-autosuggestions.git \
-    "$HOME/.oh-my-zsh/custom/plugins/zsh-autosuggestions"
-
-RUN git clone --depth=1 \
-    https://github.com/zsh-users/zsh-syntax-highlighting.git \
-    "$HOME/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting"
-
-# ================================================================
-# Python
+# Python virtual environment
 # ================================================================
 
 RUN python3 -m venv "$HOME/venv"
@@ -146,7 +119,6 @@ RUN cd "$HOME/pwndbg" && \
 # User configuration
 # ================================================================
 
-COPY --chown=pwn:pwn p10k.zsh /home/pwn/.p10k.zsh
 COPY --chown=pwn:pwn zshrc /home/pwn/.zshrc
 
 # ================================================================

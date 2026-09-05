@@ -2,10 +2,6 @@
 # PwnLab Zsh configuration
 # ================================================================
 
-# ------------------------------------------------
-# Environment
-# ------------------------------------------------
-
 export LANG=C.UTF-8
 export LC_ALL=C.UTF-8
 
@@ -14,29 +10,6 @@ export COLORTERM=truecolor
 
 export EDITOR=vim
 export VISUAL=vim
-
-# ------------------------------------------------
-# Oh My Zsh
-# ------------------------------------------------
-
-export ZSH="$HOME/.oh-my-zsh"
-
-ZSH_THEME="powerlevel10k/powerlevel10k"
-
-# Don't let Oh My Zsh update itself automatically.
-zstyle ':omz:update' mode disabled
-
-# ------------------------------------------------
-# Plugins
-# ------------------------------------------------
-
-plugins=(
-    git
-    zsh-autosuggestions
-    zsh-syntax-highlighting
-)
-
-source "$ZSH/oh-my-zsh.sh"
 
 # ------------------------------------------------
 # History
@@ -63,13 +36,13 @@ autoload -Uz compinit
 compinit
 
 # ------------------------------------------------
-# Python virtual environment
+# Python
 # ------------------------------------------------
 
 export VIRTUAL_ENV_DISABLE_PROMPT=1
 
 # ------------------------------------------------
-# Pwn environment variables
+# Pwn environment
 # ------------------------------------------------
 
 export PWN_HOME="$HOME"
@@ -85,7 +58,7 @@ export PYTHONDONTWRITEBYTECODE=1
 export PATH="$HOME/.local/bin:$HOME/venv/bin:$PATH"
 
 # ------------------------------------------------
-# Useful aliases
+# Aliases
 # ------------------------------------------------
 
 alias ll='ls -lah --color=auto'
@@ -93,6 +66,7 @@ alias la='ls -A --color=auto'
 alias l='ls -CF --color=auto'
 
 alias cls='clear'
+alias c='clear'
 
 alias py='python3'
 alias python='python3'
@@ -100,7 +74,6 @@ alias python='python3'
 alias gdbp='gdb -q'
 alias gdbr='gdb -q'
 
-alias c='clear'
 alias ..='cd ..'
 alias ...='cd ../..'
 
@@ -119,18 +92,18 @@ alias disasm='objdump -M intel -d'
 
 function pwninfo() {
     echo
-    echo "╭──────────────────────────────────────────────╮"
-    echo "│                 PwnLab                      │"
-    echo "├──────────────────────────────────────────────┤"
-    echo "│ User       : $(whoami)"
-    echo "│ Host       : $(hostname)"
-    echo "│ OS         : $(. /etc/os-release && echo "$PRETTY_NAME")"
-    echo "│ Arch       : $(uname -m)"
-    echo "│ Python     : $(python3 --version 2>&1)"
-    echo "│ GCC        : $(gcc --version | head -n1)"
-    echo "│ GDB        : $(gdb --version | head -n1)"
-    echo "│ Workspace  : $PWN_WORKSPACE"
-    echo "╰──────────────────────────────────────────────╯"
+    echo "=============================================="
+    echo " PwnLab"
+    echo "=============================================="
+    echo "User       : $(whoami)"
+    echo "Host       : $(hostname)"
+    echo "OS         : $(. /etc/os-release && echo "$PRETTY_NAME")"
+    echo "Arch       : $(uname -m)"
+    echo "Python     : $(python3 --version 2>&1)"
+    echo "GCC        : $(gcc --version | head -n1)"
+    echo "GDB        : $(gdb --version | head -n1)"
+    echo "Workspace  : $PWN_WORKSPACE"
+    echo "=============================================="
     echo
 }
 
@@ -177,7 +150,7 @@ function cdpwn() {
 }
 
 # ------------------------------------------------
-# Pwnlab startup information
+# Startup
 # ------------------------------------------------
 
 if [[ -t 1 ]]; then
@@ -187,9 +160,3 @@ if [[ -t 1 ]]; then
     echo "  Type 'pwninfo' for environment information."
     echo
 fi
-
-# ------------------------------------------------
-# Powerlevel10k
-# ------------------------------------------------
-
-[[ ! -f "$HOME/.p10k.zsh" ]] || source "$HOME/.p10k.zsh"
