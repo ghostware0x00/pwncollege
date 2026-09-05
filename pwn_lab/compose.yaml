@@ -11,23 +11,23 @@ services:
     stdin_open: true
     tty: true
 
-    # Persistent workspace
     volumes:
       - ./workspace:/workspace
 
-    # Normal Docker networking = Internet access
-    network_mode: bridge
-
-    # Required for GDB/Pwndbg debugging
-    cap_add:
-      - SYS_PTRACE
-
-    # Makes debugging unrestricted inside the container
-    security_opt:
-      - seccomp=unconfined
-
     environment:
+      HOST_UID: "${HOST_UID}"
+      HOST_GID: "${HOST_GID}"
       TERM: xterm-256color
       COLORTERM: truecolor
 
+    network_mode: bridge
+
+    cap_add:
+      - SYS_PTRACE
+
+    security_opt:
+      - seccomp=unconfined
+
     working_dir: /workspace
+
+    entrypoint: ["/usr/local/bin/pwnlab-entrypoint"]
