@@ -86,14 +86,20 @@ RUN apt-get update && apt-get install -y \
 # ------------------------------------------------
 # Create container user
 #
-# The UID/GID are deliberately NOT tied to the host
-# here. They are synchronized at container startup.
+# IMPORTANT:
+# Do NOT use the host UID/GID here.
+#
+# Ubuntu may already contain UID/GID 1000.
+# We therefore create pwn with an internal UID/GID.
+#
+# entrypoint.sh remaps these to the actual host UID/GID
+# when the container starts.
 # ------------------------------------------------
 
-RUN groupadd --gid 1000 pwn && \
+RUN groupadd --gid 10000 pwn && \
     useradd \
-        --uid 1000 \
-        --gid 1000 \
+        --uid 10000 \
+        --gid 10000 \
         --create-home \
         --shell /bin/zsh \
         pwn
@@ -180,6 +186,9 @@ COPY --chown=pwn:pwn zshrc /home/pwn/.zshrc
 
 # ------------------------------------------------
 # Runtime entrypoint
+#
+# This MUST run as root initially because it needs
+# to change the pwn UID/GID before dropping privileges.
 # ------------------------------------------------
 
 USER root

@@ -1,57 +1,50 @@
 #!/bin/bash
-
 set -e
-
-# ================================================================
-# PwnLab launcher
-# ================================================================
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 
-# ------------------------------------------------
-# Check Docker
-# ------------------------------------------------
-
-if ! command -v docker >/dev/null 2>&1; then
-    echo "ERROR: Docker is not installed."
-    echo
-    echo "Install Docker using your Linux distribution's package manager."
-    exit 1
-fi
-
-# ------------------------------------------------
-# Check Docker daemon
-# ------------------------------------------------
-
-if ! docker info >/dev/null 2>&1; then
-    echo "ERROR: Docker is not running or your user cannot access it."
-    echo
-    echo "Make sure the Docker daemon is running and your user"
-    echo "has permission to access Docker."
-    exit 1
-fi
-
-# ------------------------------------------------
-# Automatically detect host identity
-# ------------------------------------------------
-
+echo "[+] Detecting host user..."
 export HOST_UID="$(id -u)"
 export HOST_GID="$(id -g)"
 
-# ------------------------------------------------
-# Workspace
-# ------------------------------------------------
+echo "[+] Host UID: $HOST_UID"
+echo "[+] Host GID: $HOST_GID"
 
+# Workspace on the host.
 export PWN_WORKSPACE="${HOME}/pwn"
 
 mkdir -p "$PWN_WORKSPACE"
 
-# ------------------------------------------------
-# Build image if necessary, then start container
-# ------------------------------------------------
+# Check Docker.
+if ! command -v docker >/dev/null 2>&1; then
+    echo "[!] Docker is not installed."
+    exit 1
+fi
+
+if ! docker info >/dev/null 2>&1; then
+    echo "[!] Docker is not running or your user cannot access Docker."
+    exit 1
+fi
 
 cd "$SCRIPT_DIR"
 
-docker compose build
+echo "[+] Building PwnLab image..."
+docker build -t pwnlab:local .
 
-exec docker compose run --rm pwnlab
+echo "[+] Starting PwnLab..."
+echo "[+] Workspace: $PWN_WORKSPACE"
+echo
+
+exec docker run \
+    --rm \
+    -it \
+    --init \
+    --hostname pwnlab \
+    -e HOST_UID="$HOST_UID" \
+    -e HOST_GID="$HOST_GID" \
+    -e TERM=xterm-256color \
+    -e COLORTERM=truecolor \
+    -v "$PWN_WORKSPACE:/workspace" \
+    --cap-add=SYS_PTRACE \
+    --security-opt seccomp=unconfined \
+    pwnlab:local
