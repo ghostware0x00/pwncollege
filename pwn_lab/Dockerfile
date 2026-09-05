@@ -166,9 +166,14 @@ COPY --chown=pwn:pwn zshrc /home/pwn/.zshrc
 # Workspace
 # ================================================================
 
-RUN mkdir -p /workspace
+USER root
+
+RUN mkdir -p /workspace && \
+    chown pwn:pwn /workspace
 
 WORKDIR /workspace
+
+USER pwn
 
 # ================================================================
 # Run as normal pwn user
