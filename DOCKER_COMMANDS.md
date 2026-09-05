@@ -15,6 +15,7 @@ sudo pacman -S docker docker-buildx docker-compose # second
 ```bash
 sudo apt update # first
 sudo apt install -y docker.io # second
+sudo apt install docker-buildx docker-compose # third
 ```
 
 ### 2. Start Docker Service
