@@ -2,7 +2,7 @@
 
 ```bash
 cd pwn_lab
-mkdir -p workspace
+chmod +x entrypoint.sh
 docker compose build
 docker compose run --rm pwnlab
 ```
