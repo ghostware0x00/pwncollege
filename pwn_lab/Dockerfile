@@ -2,24 +2,18 @@
 # PwnLab
 # Isolated Linux environment for pwn.college / CTF / RE practice
 # ================================================================
-
 FROM ubuntu:24.04
-
 ENV DEBIAN_FRONTEND=noninteractive
 
-# ------------------------------------------------
-# Locale / terminal
-# ------------------------------------------------
 
+# Locale / terminal
 ENV LANG=C.UTF-8
 ENV LC_ALL=C.UTF-8
 ENV TERM=xterm-256color
 ENV COLORTERM=truecolor
 
-# ------------------------------------------------
-# Base system + development tools
-# ------------------------------------------------
 
+# Base system + development tools
 RUN apt-get update && apt-get install -y \
     zsh \
     git \
@@ -104,40 +98,30 @@ RUN groupadd --gid 10000 pwn && \
         --shell /bin/zsh \
         pwn
 
-# ------------------------------------------------
-# Sudo
-# ------------------------------------------------
 
+# Sudo
 RUN echo "pwn ALL=(ALL) NOPASSWD:ALL" \
     > /etc/sudoers.d/pwn && \
     chmod 0440 /etc/sudoers.d/pwn
 
-# ------------------------------------------------
+
 # Oh My Zsh
-# ------------------------------------------------
-
 USER pwn
-
 WORKDIR /home/pwn
-
 RUN git clone \
     --depth=1 \
     https://github.com/ohmyzsh/ohmyzsh.git \
     "$HOME/.oh-my-zsh"
 
-# ------------------------------------------------
-# Powerlevel10k
-# ------------------------------------------------
 
+# Powerlevel10k
 RUN git clone \
     --depth=1 \
     https://github.com/romkatv/powerlevel10k.git \
     "$HOME/.oh-my-zsh/custom/themes/powerlevel10k"
 
-# ------------------------------------------------
-# Zsh plugins
-# ------------------------------------------------
 
+# Zsh plugins
 RUN git clone \
     --depth=1 \
     https://github.com/zsh-users/zsh-autosuggestions.git \
@@ -148,27 +132,20 @@ RUN git clone \
     https://github.com/zsh-users/zsh-syntax-highlighting.git \
     "$HOME/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting"
 
-# ------------------------------------------------
+
 # Python virtual environment
-# ------------------------------------------------
-
 RUN python3 -m venv "$HOME/venv"
-
 ENV PATH="/home/pwn/venv/bin:/home/pwn/.local/bin:${PATH}"
 
-# ------------------------------------------------
-# Python pwn tools
-# ------------------------------------------------
 
+# Python pwn tools
 RUN pip install --no-cache-dir \
     pwntools \
     ropper \
     ROPgadget
 
-# ------------------------------------------------
-# Pwndbg
-# ------------------------------------------------
 
+# Pwndbg
 RUN git clone \
     --depth=1 \
     https://github.com/pwndbg/pwndbg.git \
@@ -177,10 +154,8 @@ RUN git clone \
 RUN cd "$HOME/pwndbg" && \
     ./setup.sh
 
-# ------------------------------------------------
-# User configuration
-# ------------------------------------------------
 
+# User configuration#
 COPY --chown=pwn:pwn p10k.zsh /home/pwn/.p10k.zsh
 COPY --chown=pwn:pwn zshrc /home/pwn/.zshrc
 
@@ -192,19 +167,12 @@ COPY --chown=pwn:pwn zshrc /home/pwn/.zshrc
 # ------------------------------------------------
 
 USER root
-
 COPY entrypoint.sh /usr/local/bin/pwnlab-entrypoint
-
 RUN chmod 755 /usr/local/bin/pwnlab-entrypoint
 
-# ------------------------------------------------
+
 # Container environment
-# ------------------------------------------------
-
 ENV SHELL=/bin/zsh
-
 WORKDIR /workspace
-
 ENTRYPOINT ["/usr/local/bin/pwnlab-entrypoint"]
-
 CMD ["zsh", "-l"]
