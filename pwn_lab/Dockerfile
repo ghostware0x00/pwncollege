@@ -82,7 +82,7 @@ RUN useradd \
     --shell /bin/zsh \
     pwn
 
-# Passwordless sudo inside the disposable container
+# Passwordless sudo inside the container
 RUN echo "pwn ALL=(ALL) NOPASSWD:ALL" \
     > /etc/sudoers.d/pwn && \
     chmod 0440 /etc/sudoers.d/pwn
@@ -148,10 +148,9 @@ RUN git clone \
     https://github.com/pwndbg/pwndbg.git \
     "$HOME/pwndbg"
 
-# Pwndbg installer needs sudo + uv.
 RUN curl -LsSf https://astral.sh/uv/install.sh | sh
 
-ENV PATH="/home/pwn/.local/bin:${PATH}"
+ENV PATH="/home/pwn/.local/bin:/home/pwn/venv/bin:${PATH}"
 
 RUN cd "$HOME/pwndbg" && \
     ./setup.sh
@@ -164,17 +163,17 @@ COPY --chown=pwn:pwn p10k.zsh /home/pwn/.p10k.zsh
 COPY --chown=pwn:pwn zshrc /home/pwn/.zshrc
 
 # ================================================================
-# Runtime entrypoint
+# Workspace
 # ================================================================
 
-USER root
-
-COPY entrypoint.sh /usr/local/bin/pwnlab-entrypoint
-
-RUN chmod 755 /usr/local/bin/pwnlab-entrypoint
+RUN mkdir -p /workspace
 
 WORKDIR /workspace
 
-ENTRYPOINT ["/usr/local/bin/pwnlab-entrypoint"]
+# ================================================================
+# Run as normal pwn user
+# ================================================================
+
+USER pwn
 
 CMD ["zsh", "-l"]

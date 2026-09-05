@@ -3,9 +3,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: pwnlab:local
 
-    container_name: pwnlab
+    image: pwnlab:local
 
     hostname: pwnlab
 
@@ -16,13 +15,14 @@ services:
     volumes:
       - ./workspace:/workspace
 
-    # Internet/network access
+    # Normal Docker networking = Internet access
     network_mode: bridge
 
-    # Needed for debugging processes with GDB/Pwndbg
+    # Required for GDB/Pwndbg debugging
     cap_add:
       - SYS_PTRACE
 
+    # Makes debugging unrestricted inside the container
     security_opt:
       - seccomp=unconfined
 
