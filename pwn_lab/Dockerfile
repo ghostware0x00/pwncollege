@@ -20,6 +20,7 @@ RUN apt-get update && apt-get install -y \
     curl \
     wget \
     ca-certificates \
+    sudo \
     gosu \
     vim \
     nano \
@@ -97,6 +98,11 @@ RUN groupadd --gid 10000 pwn && \
         --shell /bin/zsh \
         pwn
 
+
+# Sudo
+RUN echo "pwn ALL=(ALL) NOPASSWD:ALL" \
+    > /etc/sudoers.d/pwn && \
+    chmod 0440 /etc/sudoers.d/pwn
 
 
 # Oh My Zsh
