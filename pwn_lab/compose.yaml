@@ -8,7 +8,6 @@ services:
 
     stdin_open: true
     tty: true
-
     init: true
 
     working_dir: /workspace
@@ -22,10 +21,10 @@ services:
       TERM: xterm-256color
       COLORTERM: truecolor
 
+    cap_drop:
+      - ALL
+
     cap_add:
       - SYS_PTRACE
-
-    security_opt:
-      - seccomp=unconfined
 
     restart: "no"
