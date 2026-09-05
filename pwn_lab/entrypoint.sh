@@ -12,73 +12,87 @@ echo "[+] Host UID: $HOST_UID"
 echo "[+] Host GID: $HOST_GID"
 
 # ------------------------------------------------
-# UID conflict handling
+# Remove Ubuntu's default user
+# ------------------------------------------------
+
+if getent passwd ubuntu >/dev/null 2>&1; then
+    echo "[+] Removing default ubuntu user..."
+    userdel -r ubuntu 2>/dev/null || true
+fi
+
+if getent group ubuntu >/dev/null 2>&1; then
+    echo "[+] Removing default ubuntu group..."
+    groupdel ubuntu 2>/dev/null || true
+fi
+
+# ------------------------------------------------
+# Make sure host UID is usable
+# ------------------------------------------------
+
+if [ "$HOST_UID" = "0" ]; then
+    echo "[!] Host UID 0 is not supported."
+    exit 1
+fi
+
+# ------------------------------------------------
+# UID
 # ------------------------------------------------
 
 EXISTING_USER="$(getent passwd "$HOST_UID" | cut -d: -f1 || true)"
 
-if [[ -n "$EXISTING_USER" && "$EXISTING_USER" != "pwn" ]]; then
+if [ -n "$EXISTING_USER" ] && [ "$EXISTING_USER" != "pwn" ]; then
     echo "[!] UID $HOST_UID is already used by '$EXISTING_USER'."
+    echo "[!] Cannot safely remap pwn to this UID."
+    exit 1
+fi
 
-    # Remove the conflicting user if it is a normal
-    # image-created user and not pwn.
-    userdel -r "$EXISTING_USER" 2>/dev/null || true
+CURRENT_UID="$(id -u pwn)"
+
+if [ "$CURRENT_UID" != "$HOST_UID" ]; then
+    echo "[+] Changing pwn UID: $CURRENT_UID -> $HOST_UID"
+    usermod -u "$HOST_UID" pwn
 fi
 
 # ------------------------------------------------
-# GID conflict handling
+# GID
 # ------------------------------------------------
 
 EXISTING_GROUP="$(getent group "$HOST_GID" | cut -d: -f1 || true)"
 
-if [[ -n "$EXISTING_GROUP" && "$EXISTING_GROUP" != "pwn" ]]; then
+if [ -n "$EXISTING_GROUP" ] && [ "$EXISTING_GROUP" != "pwn" ]; then
     echo "[!] GID $HOST_GID is already used by '$EXISTING_GROUP'."
-
-    groupdel "$EXISTING_GROUP" 2>/dev/null || true
+    echo "[!] Cannot safely remap pwn to this GID."
+    exit 1
 fi
 
-# ------------------------------------------------
-# Change pwn UID/GID
-# ------------------------------------------------
-
-CURRENT_UID="$(id -u pwn)"
 CURRENT_GID="$(id -g pwn)"
 
-if [[ "$CURRENT_UID" != "$HOST_UID" ]]; then
-    usermod -u "$HOST_UID" pwn
-fi
-
-if [[ "$CURRENT_GID" != "$HOST_GID" ]]; then
+if [ "$CURRENT_GID" != "$HOST_GID" ]; then
+    echo "[+] Changing pwn GID: $CURRENT_GID -> $HOST_GID"
     groupmod -g "$HOST_GID" pwn
 fi
 
 # ------------------------------------------------
-# Fix ownership
+# Fix pwn home ownership
 # ------------------------------------------------
 
-chown -R pwn:pwn /home/pwn
-chown -R pwn:pwn /workspace
+chown -R "$HOST_UID:$HOST_GID" /home/pwn
 
 # ------------------------------------------------
-# Display final identity
+# Workspace
 # ------------------------------------------------
 
-echo
-echo "[+] Container identity:"
-id pwn
-
-echo
-echo "[+] Workspace:"
+echo "[+] Workspace permissions:"
 ls -ld /workspace
+
+# ------------------------------------------------
+# Start shell as pwn
+# ------------------------------------------------
 
 echo
 echo "=============================================="
 echo " Starting PwnLab"
 echo "=============================================="
 echo
-
-# ------------------------------------------------
-# Start Zsh as pwn
-# ------------------------------------------------
 
 exec su -s /bin/zsh pwn -c 'cd /workspace && exec zsh -l'

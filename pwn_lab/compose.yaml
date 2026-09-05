@@ -15,8 +15,8 @@ services:
       - ./workspace:/workspace
 
     environment:
-      HOST_UID: "${HOST_UID}"
-      HOST_GID: "${HOST_GID}"
+      # HOST_UID: "${HOST_UID}"
+      # HOST_GID: "${HOST_GID}"
       TERM: xterm-256color
       COLORTERM: truecolor
 
