@@ -3,23 +3,46 @@
 
 ### 1. Install Docker
 
+##### Arch Linux
+
 ```bash
-sudo pacman -S docker docker-buildx docker-compose
+sudo pacman -Syu # first
+sudo pacman -S docker docker-buildx docker-compose # second
+```
+
+#### Kali Linux
+
+```bash
+sudo apt update # first
+sudo apt install -y docker.io # second
 ```
 
 ### 2. Start Docker Service
+
+#### Arch/Kali Linux
 
 ```bash
 sudo systemctl start docker.service
 ```
 
+
 ### 3. Enable Docker Service at Startup
+
+#### Arch Linux
 
 ```bash
 sudo systemctl enable docker.service
 ```
 
+#### Kali Linux
+
+```bash
+sudo systemctl enable docker --now
+```
+
 ### 4. Add Current User to Docker Group
+
+#### Arch/Kali Linux
 
 - creating the `docker` group first before adding the `USER` to this group.
 ```bash
@@ -83,10 +106,8 @@ docker builder prune -a
 docker ps -a
 ```
 
-
 ### Wipe the Docker Cache & Unused Data
 
 ```bash
 docker system prune -a --volumes --force
 ```
-
